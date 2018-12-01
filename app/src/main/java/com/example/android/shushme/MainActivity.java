@@ -18,13 +18,16 @@ package com.example.android.shushme;
 
 import android.app.LoaderManager;
 import android.content.Loader;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.CheckBox;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -103,14 +106,25 @@ public class MainActivity extends AppCompatActivity implements
 
     // TODO (5) Override onConnected, onConnectionSuspended and onConnectionFailed for GoogleApiClient
     // TODO (7) Override onResume and inside it initialize the location permissions checkbox
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        CheckBox enableLocation = (CheckBox) findViewById(R.id.checkBox);
-    }
-
     // TODO (8) Implement onLocationPermissionClicked to handle the CheckBox click event
     // TODO (9) Implement the Add Place Button click event to show  a toast message with the permission status
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Initialize location permissions checkbox
+        CheckBox locationPermissions = (CheckBox) findViewById(R.id.checkBox);
+        if (ActivityCompat.checkSelfPermission(MainActivity.this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            locationPermissions.setChecked(false);
+        } else {
+            locationPermissions.setChecked(true);
+            locationPermissions.setEnabled(false);
+        }
+    }
+
+    public void onLocationPermissionClicked(View view) {
+        ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+    }
 
 }
