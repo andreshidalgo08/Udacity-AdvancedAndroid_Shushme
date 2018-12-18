@@ -16,6 +16,7 @@ package com.example.android.shushme;
 * limitations under the License.
 */
 
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -30,15 +31,21 @@ import android.widget.CheckBox;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
+import com.google.android.gms.location.places.ui.PlacePicker;
 
 public class MainActivity extends AppCompatActivity implements
         ConnectionCallbacks,
         OnConnectionFailedListener {
+
+    int PLACE_PICKER_REQUEST = 1;
 
     // Constants
     public static final String TAG = MainActivity.class.getSimpleName();
@@ -120,11 +127,32 @@ public class MainActivity extends AppCompatActivity implements
             return;
         }
         // TODO (1) Create a PlacePicker.IntentBuilder and call startActivityForResult
+        try {
+            PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+            startActivityForResult(builder.build(this), PLACE_PICKER_REQUEST);
+        } catch (GooglePlayServicesNotAvailableException e) {
+            Toast.makeText(this, "Aca", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        } catch (GooglePlayServicesRepairableException e) {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+
         // TODO (2) Handle GooglePlayServices exceptions
         Toast.makeText(this, getString(R.string.location_permissions_granted_message), Toast.LENGTH_LONG).show();
     }
 
     // TODO (3) Implement onActivityResult and check that the requestCode is PLACE_PICKER_REQUEST
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == PLACE_PICKER_REQUEST && resultCode == RESULT_OK) {
+            Place place = PlacePicker.getPlace(this, data);
+            String toastMsg = String.format("Place: %s", place.getName());
+
+            Toast.makeText(this, toastMsg, Toast.LENGTH_LONG).show();
+        }
+    }
+
     // TODO (4) In onActivityResult, use PlacePicker.getPlace to extract the Place ID and insert it into the DB
 
     @Override
